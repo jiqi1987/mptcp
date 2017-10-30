@@ -10,6 +10,7 @@
 #include "base/event_loop.h"
 #include "protocol/mptcp_test_protocol.h"
 #include "network/address_utility.h"
+#include "network/tcp_connection.h"
 #include "network/tcp_server.h"
 
 using std::cout;
@@ -19,7 +20,8 @@ using namespace agora::base;  // NOLINT
 using namespace agora::network;  // NOLINT
 
 class MptcpServer :
-  private TcpServerCallback {
+  private TcpServerCallback,
+  private TcpConnectionCallback {
  public:
   explicit MptcpServer(event_base *base, uint16_t port) :
     server_(base, this) {
@@ -31,6 +33,11 @@ class MptcpServer :
  protected:
   virtual void OnConnectionAccepted(TcpConnection *conn);
 
+  virtual void OnError(TcpConnection *conn, int events);
+  virtual void OnPacketReceived(TcpConnection *conn, Unpacker *p,
+                                uint16_t service_type, uint16_t uri);
+
  private:
   TcpServer server_;
+  TcpConnection *conn_;
 };
